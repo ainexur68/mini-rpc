@@ -46,7 +46,7 @@ public class MiniRpcDecoder extends ByteToMessageDecoder {
 
             // 5. 半包（数据不够），回退 readerIndex
             if (in.readableBytes() < headerLen + bodyLen) {
-                in.markReaderIndex();
+                in.resetReaderIndex();
                 return;
             }
 
