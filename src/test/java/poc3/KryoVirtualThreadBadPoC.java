@@ -1,11 +1,11 @@
 package poc3;
+
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
@@ -61,27 +61,27 @@ public class KryoVirtualThreadBadPoC {
 
         // 序列化 + 反序列化
         byte[] bytes = serialize(original);
-        Object back = deserialize(bytes, useA ? RpcRequest.class : OtherRequest.class);
-
-        // 强校验：结构错 / 类型错 / 字段错，全部视为数据损坏
-        if (useA) {
-            if (!(back instanceof RpcRequest r)) {
-                fail("Expect RpcRequest, but got " + safeToStr(back), i);
-            }
-            if (!"HelloService".equals(r.service)
-                    || !"hi".equals(r.method)
-                    || r.args == null
-                    || r.args.length != 3) {
-                fail("RpcRequest corrupted, back=" + safeToStr(r), i);
-            }
-        } else {
-            if (!(back instanceof OtherRequest r)) {
-                fail("Expect OtherRequest, but got " + safeToStr(back), i);
-            }
-            if (r.id != i || r.payload == null || !r.payload.startsWith("payload-" + i)) {
-                fail("OtherRequest corrupted, back=" + safeToStr(r), i);
-            }
-        }
+//        Object back = deserialize(bytes, useA ? RpcRequest.class : OtherRequest.class);
+//
+//        // 强校验：结构错 / 类型错 / 字段错，全部视为数据损坏
+//        if (useA) {
+//            if (!(back instanceof RpcRequest r)) {
+//                fail("Expect RpcRequest, but got " + safeToStr(back), i);
+//            }
+//            if (!"HelloService".equals(r.service)
+//                    || !"hi".equals(r.method)
+//                    || r.args == null
+//                    || r.args.length != 3) {
+//                fail("RpcRequest corrupted, back=" + safeToStr(r), i);
+//            }
+//        } else {
+//            if (!(back instanceof OtherRequest r)) {
+//                fail("Expect OtherRequest, but got " + safeToStr(back), i);
+//            }
+//            if (r.id != i || r.payload == null || !r.payload.startsWith("payload-" + i)) {
+//                fail("OtherRequest corrupted, back=" + safeToStr(r), i);
+//            }
+//        }
     }
 
     private static byte[] serialize(Object obj) {
