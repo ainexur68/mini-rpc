@@ -63,7 +63,7 @@ This validates:
 - Protocol framing (22B fixed header + ext header skip + body)
 - Inflight correlation via RequestId
 - Server offloading business to Java 21 virtual threads
-- Basic JSON serialization (1.0 default), Kryo behind SPI (optional)
+- Basic JSON serialization (1.0 default only)
 
 ### US E1.1 — Protocol framing works for sticky/half packets
 #### Tasks
@@ -221,6 +221,6 @@ This plan is aligned to 1.0 frozen requirements:
 - Redis registry + TTL + pub/sub ✅
 - LB random/RR via SPI ✅
 - governance: timeout/retry(once)/trace/log ✅
-- JSON default + Kryo via SPI (optional) ✅
+- JSON default only (1.0); Kryo is PoC-only and excluded from 1.0 delivery ✅
 
 If any future change conflicts with the freeze doc, defer to the freeze doc.

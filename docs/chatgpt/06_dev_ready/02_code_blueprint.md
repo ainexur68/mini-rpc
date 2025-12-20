@@ -236,8 +236,8 @@ public final class SerializerRegistry {
 
 > Note: choose a JSON library (Jackson recommended). Keep it isolated in this module.
 
-### 4.4 Optional Kryo impl (behind SPI)
-`com.minirpc.serialization.kryo.KryoSerializer` with pooling/ThreadLocal.
+### 4.4 Post-1.0 (Kryo, optional)
+Kryo is excluded from 1.0 delivery. Keep SPI extensible, but only ship JSON in 1.0.
 
 ---
 

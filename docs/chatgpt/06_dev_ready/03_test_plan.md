@@ -43,6 +43,7 @@
 ---
 
 ## 3. Serialization Tests (`minirpc-serialization`)
+> 1.0 ships JSON only; Kryo is out of scope for 1.0 tests.
 
 ### UT-S1 JSON round-trip request
 **Class**: `com.minirpc.serialization.json.JsonSerializerTest`
