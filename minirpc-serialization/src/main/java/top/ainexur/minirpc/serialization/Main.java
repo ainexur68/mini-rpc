@@ -1,4 +1,4 @@
-package top.ainexur.minirpc;
+package top.ainexur.minirpc.serialization;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.

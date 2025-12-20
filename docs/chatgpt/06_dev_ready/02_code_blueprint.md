@@ -33,11 +33,11 @@
 ## 2. Common Layer (`minirpc-common`)
 
 ### 2.1 Package
-`com.minirpc.common`
+`top.ainexur.minirpc.common`
 
 ### 2.2 Core Models
 ```java
-package com.minirpc.common.model;
+package top.ainexur.minirpc.common.model;
 
 public record Endpoint(String host, int port) {}
 
@@ -52,7 +52,7 @@ public record ServiceInstance(ServiceKey key, Endpoint endpoint, long weight, ja
 
 ### 2.3 Error Model
 ```java
-package com.minirpc.common.error;
+package top.ainexur.minirpc.common.error;
 
 public enum RpcErrorCode {
     OK(0),
@@ -81,13 +81,13 @@ public final class RpcException extends RuntimeException {
 ## 3. Protocol Layer (`minirpc-protocol`)
 
 ### 3.1 Packages
-- `com.minirpc.protocol`
-- `com.minirpc.protocol.frame`
-- `com.minirpc.protocol.codec`
+- `top.ainexur.minirpc.protocol`
+- `top.ainexur.minirpc.protocol.frame`
+- `top.ainexur.minirpc.protocol.codec`
 
 ### 3.2 Fixed Header Constants
 ```java
-package com.minirpc.protocol;
+package top.ainexur.minirpc.protocol;
 
 public final class MiniRpcProtocol {
     public static final short MAGIC = (short) 0xCAFE;
@@ -99,7 +99,7 @@ public final class MiniRpcProtocol {
 
 ### 3.3 Flags bits (16-bit)
 ```java
-package com.minirpc.protocol;
+package top.ainexur.minirpc.protocol;
 
 public final class FlagBits {
     public static final short HEARTBEAT = 1 << 0;
@@ -113,7 +113,7 @@ public final class FlagBits {
 
 ### 3.4 Frame Model
 ```java
-package com.minirpc.protocol.frame;
+package top.ainexur.minirpc.protocol.frame;
 
 public record MiniRpcFrame(
         short magic,
@@ -130,7 +130,7 @@ public record MiniRpcFrame(
 
 ### 3.5 Message Models (Body)
 ```java
-package com.minirpc.protocol.message;
+package top.ainexur.minirpc.protocol.message;
 
 import java.util.Map;
 
@@ -154,9 +154,9 @@ public record RpcResponse(
 
 ### 3.6 Netty Codecs (signatures)
 ```java
-package com.minirpc.protocol.codec;
+package top.ainexur.minirpc.protocol.codec;
 
-import com.minirpc.protocol.frame.MiniRpcFrame;
+import top.ainexur.minirpc.protocol.frame.MiniRpcFrame;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
@@ -180,11 +180,11 @@ public final class MiniRpcFrameEncoder extends MessageToByteEncoder<MiniRpcFrame
 
 ### 3.7 Frame <-> Message codec (body serialize/deserialize)
 ```java
-package com.minirpc.protocol.codec;
+package top.ainexur.minirpc.protocol.codec;
 
-import com.minirpc.protocol.frame.MiniRpcFrame;
-import com.minirpc.protocol.message.RpcRequest;
-import com.minirpc.protocol.message.RpcResponse;
+import top.ainexur.minirpc.protocol.frame.MiniRpcFrame;
+import top.ainexur.minirpc.protocol.message.RpcRequest;
+import top.ainexur.minirpc.protocol.message.RpcResponse;
 
 public interface MessageCodec {
     MiniRpcFrame encodeRequest(RpcRequest request);
@@ -199,7 +199,7 @@ public interface MessageCodec {
 
 ### 4.1 SPI Interface
 ```java
-package com.minirpc.serialization;
+package top.ainexur.minirpc.serialization;
 
 public interface Serializer {
     byte serializeType();
@@ -210,7 +210,7 @@ public interface Serializer {
 
 ### 4.2 Loader/Registry
 ```java
-package com.minirpc.serialization;
+package top.ainexur.minirpc.serialization;
 
 import java.util.Map;
 import java.util.ServiceLoader;
@@ -232,7 +232,7 @@ public final class SerializerRegistry {
 ```
 
 ### 4.3 JSON impl
-`com.minirpc.serialization.json.JsonSerializer` with `serializeType() == 0`
+`top.ainexur.minirpc.serialization.json.JsonSerializer` with `serializeType() == 0`
 
 > Note: choose a JSON library (Jackson recommended). Keep it isolated in this module.
 
@@ -244,16 +244,16 @@ Kryo is excluded from 1.0 delivery. Keep SPI extensible, but only ship JSON in 1
 ## 5. Transport Layer (`minirpc-transport-netty`)
 
 ### 5.1 Packages
-- `com.minirpc.transport`
-- `com.minirpc.transport.netty`
+- `top.ainexur.minirpc.transport`
+- `top.ainexur.minirpc.transport.netty`
 
 ### 5.2 Frozen interfaces (must exist)
 ```java
-package com.minirpc.transport;
+package top.ainexur.minirpc.transport;
 
-import com.minirpc.common.model.Endpoint;
-import com.minirpc.protocol.message.RpcRequest;
-import com.minirpc.protocol.message.RpcResponse;
+import top.ainexur.minirpc.common.model.Endpoint;
+import top.ainexur.minirpc.protocol.message.RpcRequest;
+import top.ainexur.minirpc.protocol.message.RpcResponse;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -289,10 +289,10 @@ public interface ConnectionManager {
 
 ### 5.4 Provider business offload (virtual thread)
 ```java
-package com.minirpc.transport;
+package top.ainexur.minirpc.transport;
 
-import com.minirpc.protocol.message.RpcRequest;
-import com.minirpc.protocol.message.RpcResponse;
+import top.ainexur.minirpc.protocol.message.RpcRequest;
+import top.ainexur.minirpc.protocol.message.RpcResponse;
 
 public interface RequestHandler {
     RpcResponse handle(RpcRequest request);
@@ -309,20 +309,20 @@ Implementation detail:
 ## 6. Core Layer (`minirpc-core`)
 
 ### 6.1 Packages
-- `com.minirpc.core`
-- `com.minirpc.core.export`
-- `com.minirpc.core.proxy`
-- `com.minirpc.core.invoke`
-- `com.minirpc.core.filter`
-- `com.minirpc.core.context`
+- `top.ainexur.minirpc.core`
+- `top.ainexur.minirpc.core.export`
+- `top.ainexur.minirpc.core.proxy`
+- `top.ainexur.minirpc.core.invoke`
+- `top.ainexur.minirpc.core.filter`
+- `top.ainexur.minirpc.core.context`
 
 ### 6.2 Core contracts
 ```java
-package com.minirpc.core;
+package top.ainexur.minirpc.core;
 
-import com.minirpc.common.model.ServiceKey;
-import com.minirpc.protocol.message.RpcRequest;
-import com.minirpc.protocol.message.RpcResponse;
+import top.ainexur.minirpc.common.model.ServiceKey;
+import top.ainexur.minirpc.protocol.message.RpcRequest;
+import top.ainexur.minirpc.protocol.message.RpcResponse;
 
 public interface Invoker {
     RpcResponse invoke(RpcRequest request);
@@ -336,19 +336,19 @@ public interface Exporter {
 
 ### 6.3 Dispatcher (Provider side)
 ```java
-package com.minirpc.core.export;
+package top.ainexur.minirpc.core.export;
 
-import com.minirpc.common.error.RpcErrorCode;
-import com.minirpc.common.error.RpcException;
-import com.minirpc.common.model.ServiceKey;
-import com.minirpc.protocol.message.RpcRequest;
-import com.minirpc.protocol.message.RpcResponse;
+import top.ainexur.minirpc.common.error.RpcErrorCode;
+import top.ainexur.minirpc.common.error.RpcException;
+import top.ainexur.minirpc.common.model.ServiceKey;
+import top.ainexur.minirpc.protocol.message.RpcRequest;
+import top.ainexur.minirpc.protocol.message.RpcResponse;
 
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public final class ServiceExporter implements com.minirpc.core.Exporter {
+public final class ServiceExporter implements top.ainexur.minirpc.core.Exporter {
     private final Map<ServiceKey, Object> services = new ConcurrentHashMap<>();
     @Override public void export(ServiceKey key, Object impl) { services.put(key, impl); }
     @Override public Object lookup(ServiceKey key) { return services.get(key); }
@@ -356,12 +356,12 @@ public final class ServiceExporter implements com.minirpc.core.Exporter {
 ```
 
 ```java
-package com.minirpc.core.export;
+package top.ainexur.minirpc.core.export;
 
-import com.minirpc.common.error.RpcErrorCode;
-import com.minirpc.common.model.ServiceKey;
-import com.minirpc.protocol.message.RpcRequest;
-import com.minirpc.protocol.message.RpcResponse;
+import top.ainexur.minirpc.common.error.RpcErrorCode;
+import top.ainexur.minirpc.common.model.ServiceKey;
+import top.ainexur.minirpc.protocol.message.RpcRequest;
+import top.ainexur.minirpc.protocol.message.RpcResponse;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -398,12 +398,12 @@ public final class ProviderDispatcher {
 
 ### 6.4 Consumer Proxy
 ```java
-package com.minirpc.core.proxy;
+package top.ainexur.minirpc.core.proxy;
 
-import com.minirpc.common.model.Endpoint;
-import com.minirpc.protocol.message.RpcRequest;
-import com.minirpc.protocol.message.RpcResponse;
-import com.minirpc.transport.TransportClient;
+import top.ainexur.minirpc.common.model.Endpoint;
+import top.ainexur.minirpc.protocol.message.RpcRequest;
+import top.ainexur.minirpc.protocol.message.RpcResponse;
+import top.ainexur.minirpc.transport.TransportClient;
 
 import java.lang.reflect.Proxy;
 import java.util.Map;
@@ -448,10 +448,10 @@ public final class ReferenceFactory {
 
 ### 7.1 Filter SPI
 ```java
-package com.minirpc.governance;
+package top.ainexur.minirpc.governance;
 
-import com.minirpc.protocol.message.RpcRequest;
-import com.minirpc.protocol.message.RpcResponse;
+import top.ainexur.minirpc.protocol.message.RpcRequest;
+import top.ainexur.minirpc.protocol.message.RpcResponse;
 
 public interface Filter {
     RpcResponse filter(RpcRequest request, FilterChain chain);
@@ -476,10 +476,10 @@ public interface FilterChain {
 
 ### 8.1 Interfaces
 ```java
-package com.minirpc.registry;
+package top.ainexur.minirpc.registry;
 
-import com.minirpc.common.model.ServiceInstance;
-import com.minirpc.common.model.ServiceKey;
+import top.ainexur.minirpc.common.model.ServiceInstance;
+import top.ainexur.minirpc.common.model.ServiceKey;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -509,11 +509,11 @@ public interface Registry {
 
 ### 9.1 Interface + SPI
 ```java
-package com.minirpc.lb;
+package top.ainexur.minirpc.lb;
 
-import com.minirpc.common.model.ServiceInstance;
-import com.minirpc.common.model.ServiceKey;
-import com.minirpc.protocol.message.RpcRequest;
+import top.ainexur.minirpc.common.model.ServiceInstance;
+import top.ainexur.minirpc.common.model.ServiceKey;
+import top.ainexur.minirpc.protocol.message.RpcRequest;
 
 import java.util.List;
 

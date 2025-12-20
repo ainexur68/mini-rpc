@@ -15,7 +15,7 @@
         <module>minirpc-registry-redis</module>
         <module>minirpc-loadbalancer</module>
         <module>minirpc-governance</module>
-        <module>minrpc-transport-netty</module>
+        <module>minirpc-transport-netty</module>
         <module>minirpc-core</module>
         <module>minirpc-example-provider</module>
         <module>minirpc-example-consumer</module>

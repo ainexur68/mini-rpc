@@ -478,7 +478,7 @@ MiniRPC 目前不内置一致性哈希，但通过 SPI 可无缝扩展。
 扩展方式：
 
 ```
-META-INF/services/com.minirpc.LoadBalancer
+META-INF/services/top.ainexur.minirpc.LoadBalancer
 ```
 
 文件内容：

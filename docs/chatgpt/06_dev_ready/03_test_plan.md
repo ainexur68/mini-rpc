@@ -15,7 +15,7 @@
 ## 2. Protocol Tests (`minirpc-protocol`)
 
 ### UT-P1 Half packet decode
-**Class**: `com.minirpc.protocol.codec.MiniRpcFrameDecoderHalfPacketTest`
+**Class**: `top.ainexur.minirpc.protocol.codec.MiniRpcFrameDecoderHalfPacketTest`
 
 **Given**
 - One encoded frame bytes
@@ -46,14 +46,14 @@
 > 1.0 ships JSON only; Kryo is out of scope for 1.0 tests.
 
 ### UT-S1 JSON round-trip request
-**Class**: `com.minirpc.serialization.json.JsonSerializerTest`
+**Class**: `top.ainexur.minirpc.serialization.json.JsonSerializerTest`
 
 **Assert**
 - request serialized then deserialized equals expected fields
 - attachments preserved
 
 ### UT-S2 SPI discovery
-**Class**: `com.minirpc.serialization.SerializerRegistryTest`
+**Class**: `top.ainexur.minirpc.serialization.SerializerRegistryTest`
 
 **Assert**
 - `new SerializerRegistry().required((byte)0)` returns JsonSerializer
@@ -63,7 +63,7 @@
 ## 4. Transport Tests (`minirpc-transport-netty`)
 
 ### IT-T1 Server/client basic
-**Class**: `com.minirpc.transport.netty.NettyTransportBasicIT`
+**Class**: `top.ainexur.minirpc.transport.netty.NettyTransportBasicIT`
 
 **Setup**
 - start server on random port with `RequestHandler` echo implementation
@@ -97,7 +97,7 @@
 ## 5. Core Tests (`minirpc-core`)
 
 ### IT-C1 End-to-end hello
-**Class**: `com.minirpc.core.e2e.HelloServiceE2EIT`
+**Class**: `top.ainexur.minirpc.core.e2e.HelloServiceE2EIT`
 
 **Setup**
 - Provider exporter registers HelloServiceImpl

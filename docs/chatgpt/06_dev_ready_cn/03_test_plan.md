@@ -15,7 +15,7 @@
 ## 2. Protocol 测试（`minirpc-protocol`）
 
 ### UT-P1 Half packet decode
-**类**：`com.minirpc.protocol.codec.MiniRpcFrameDecoderHalfPacketTest`
+**类**：`top.ainexur.minirpc.protocol.codec.MiniRpcFrameDecoderHalfPacketTest`
 
 **Given**
 - 一帧完整编码字节
@@ -46,14 +46,14 @@
 > 1.0 仅提供 JSON 实现；Kryo 不在 1.0 测试范围内。
 
 ### UT-S1 JSON 循环
-**类**：`com.minirpc.serialization.json.JsonSerializerTest`
+**类**：`top.ainexur.minirpc.serialization.json.JsonSerializerTest`
 
 **Assert**
 - request 序列化/反序列化字段一致
 - attachments 保持
 
 ### UT-S2 SPI 发现
-**类**：`com.minirpc.serialization.SerializerRegistryTest`
+**类**：`top.ainexur.minirpc.serialization.SerializerRegistryTest`
 
 **Assert**
 - `new SerializerRegistry().required((byte)0)` 返回 JsonSerializer
@@ -63,7 +63,7 @@
 ## 4. Transport 测试（`minirpc-transport-netty`）
 
 ### IT-T1 Server/client basic
-**类**：`com.minirpc.transport.netty.NettyTransportBasicIT`
+**类**：`top.ainexur.minirpc.transport.netty.NettyTransportBasicIT`
 
 **Setup**
 - 启动 server（随机端口）与 `RequestHandler` echo
@@ -97,7 +97,7 @@
 ## 5. Core 测试（`minirpc-core`）
 
 ### IT-C1 End-to-end hello
-**类**：`com.minirpc.core.e2e.HelloServiceE2EIT`
+**类**：`top.ainexur.minirpc.core.e2e.HelloServiceE2EIT`
 
 **Setup**
 - Provider exporter 注册 HelloServiceImpl

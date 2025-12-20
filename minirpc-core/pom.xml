@@ -32,7 +32,7 @@
 
         <dependency>
             <groupId>top.ainexur.minirpc</groupId>
-            <artifactId>minrpc-transport-netty</artifactId>
+            <artifactId>minirpc-transport-netty</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
 
