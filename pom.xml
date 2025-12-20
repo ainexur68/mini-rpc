@@ -7,6 +7,19 @@
     <groupId>top.ainexur.minirpc</groupId>
     <artifactId>mini-rpc</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <modules>
+        <module>minirpc-common</module>
+        <module>minirpc-protocol</module>
+        <module>minirpc-serialization</module>
+        <module>minirpc-registry-redis</module>
+        <module>minirpc-loadbalancer</module>
+        <module>minirpc-governance</module>
+        <module>minrpc-transport-netty</module>
+        <module>minirpc-core</module>
+        <module>minirpc-example-provider</module>
+        <module>minirpc-example-consumer</module>
+    </modules>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
