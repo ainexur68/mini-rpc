@@ -20,7 +20,7 @@ public class KryoBadPoC {
     }
 
     public static void main(String[] args) {
-        int total = 50000; // 次数可以调大点，更容易触发问题
+        int total = 300000; // 提高次数，提升复现确定性
 
         System.out.println("Start bad Kryo PoC, total = " + total);
 

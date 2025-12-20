@@ -1,4 +1,4 @@
-package poc4;
+package poc6;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.Unpooled;
