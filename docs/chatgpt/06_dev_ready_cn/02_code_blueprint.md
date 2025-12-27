@@ -20,7 +20,7 @@
 - `minirpc-example-consumer`
 
 ### 1.2 依赖规则（必须遵循）
-- `minirpc-protocol` -> `minirpc-common`
+- `minirpc-protocol` -> `minirpc-common`, `minirpc-serialization`
 - `minirpc-serialization` -> `minirpc-common`
 - `minirpc-transport-netty` -> `minirpc-common`, `minirpc-protocol`, `minirpc-serialization`
 - `minirpc-registry-redis` -> `minirpc-common`
