@@ -9,7 +9,8 @@ public enum RpcErrorCode {
     DESERIALIZE_ERROR(5),
     SERIALIZE_ERROR(6),
     NO_PROVIDER(7),
-    TOO_LARGE_REQUEST(10);
+    TOO_LARGE_REQUEST(10),
+    UNSUPPORTED_SERIALIZE_TYPE(21);
 
     public final int code;
 
