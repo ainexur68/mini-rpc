@@ -7,6 +7,7 @@ import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.jupiter.api.Test;
 import top.ainexur.minirpc.common.RpcException;
 import top.ainexur.minirpc.protocol.MiniRpcProtocol;
+import top.ainexur.minirpc.protocol.codec.decoder.MiniRpcFrameDecoder;
 import top.ainexur.minirpc.protocol.frame.MiniRpcFrame;
 
 import java.nio.charset.StandardCharsets;
@@ -35,8 +36,8 @@ class MiniRpcFrameDecoderTest {
             channel.writeInbound(Unpooled.wrappedBuffer(bytes, split, bytes.length - split));
             MiniRpcFrame frame = channel.readInbound();
             assertNotNull(frame);
-            assertEquals(MiniRpcProtocol.MAGIC, frame.magic());
-            assertEquals(MiniRpcProtocol.VERSION, frame.version());
+            assertEquals(MiniRpcProtocol.MAGIC, frame.MAGIC);
+            assertEquals(MiniRpcProtocol.VERSION, frame.VERSION);
             assertArrayEquals(extHeaders, frame.extHeader());
             assertArrayEquals(body, frame.body());
         } finally {

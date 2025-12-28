@@ -1,4 +1,4 @@
-package top.ainexur.minirpc.protocol.decoder;
+package top.ainexur.minirpc.protocol.codec.decoder;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -52,9 +52,13 @@ public class MiniRpcFrameDecoder extends ByteToMessageDecoder {
         byte[] body = new byte[bodyLen];
         in.readBytes(body);
 
-        out.add(new MiniRpcFrame(
-                magic, version, serializeType, flags,
-                requestId, headerLen, bodyLen, extHeaders, body
-        ));
+        out.add(
+            new MiniRpcFrame(
+                serializeType,
+                flags,
+                requestId,
+                extHeaders,
+                body)
+        );
     }
 }
