@@ -91,15 +91,16 @@ package top.ainexur.minirpc.protocol;
 
 public final class MiniRpcProtocol {
     public static final short MAGIC = (short) 0xCAFE;
-    public static final byte VERSION_1 = 1;
-    public static final int FIXED_HEADER_BYTES = 22;
+    public static final byte VERSION = 1;
+    public static final int FIXED_HEADER_SIZE = 22;
+    public static final long MAX_FRAME_SIZE = 1024 * 1024;
     private MiniRpcProtocol() {}
 }
 ```
 
 ### 3.3 Flags bits（16-bit）
 ```java
-package top.ainexur.minirpc.protocol;
+package top.ainexur.minirpc.common;
 
 public final class FlagBits {
     public static final short HEARTBEAT = 1 << 0;
@@ -116,16 +117,17 @@ public final class FlagBits {
 package top.ainexur.minirpc.protocol.frame;
 
 public record MiniRpcFrame(
-        short magic,
-        byte version,
         byte serializeType,
         short flags,
         long requestId,
-        int headerLength,
-        int bodyLength,
         byte[] extHeader,   // nullable or empty
         byte[] bodyBytes    // nullable or empty
-) {}
+) {
+    public static final short MAGIC = MiniRpcProtocol.MAGIC;
+    public static final byte VERSION = MiniRpcProtocol.VERSION;
+    public int headerLength() { return extHeader == null ? 0 : extHeader.length; }
+    public int bodyLength() { return bodyBytes == null ? 0 : bodyBytes.length; }
+}
 ```
 
 ### 3.5 Message 模型（Body）
@@ -146,7 +148,6 @@ public record RpcRequest(
 public record RpcResponse(
         long requestId,
         int code,                 // RpcErrorCode.code
-        String message,           // optional
         Object returnValue,       // nullable
         Map<String, String> attachments
 ) {}
