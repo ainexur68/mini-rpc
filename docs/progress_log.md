@@ -77,6 +77,53 @@ E1 进度条：[####------] 40%
   - JsonSerializer 只需验证对任意 POJO 的正确性，满足 SPI 的最小能力证明。
 - 先补测试再推进 E1.3，是为了确保“协议与序列化”两块基础能力可重复验证，减少后续联调的不确定性。
 
+### 2026-01-02 启动 E1.3 传输层最小实现与测试
+改动目标：
+- 打通 Netty 长连接传输的最小闭环（请求发出→服务端处理→响应返回）。
+- 提供可复用的传输接口，保证 E1.4 能只依赖接口而非 Netty 细节。
+- 增加集成测试覆盖（请求响应、并发、虚拟线程 offload）。
+
+新增/修改文件：
+- 新增：`minirpc-transport-netty/src/main/java/top/ainexur/minirpc/transport/Endpoint.java`
+- 新增：`minirpc-transport-netty/src/main/java/top/ainexur/minirpc/transport/TransportClient.java`
+- 新增：`minirpc-transport-netty/src/main/java/top/ainexur/minirpc/transport/TransportServer.java`
+- 新增：`minirpc-transport-netty/src/main/java/top/ainexur/minirpc/transport/ConnectionManager.java`
+- 新增：`minirpc-transport-netty/src/main/java/top/ainexur/minirpc/transport/RequestHandler.java`
+- 新增：`minirpc-transport-netty/src/main/java/top/ainexur/minirpc/transport/netty/NettyTransportClient.java`
+- 新增：`minirpc-transport-netty/src/main/java/top/ainexur/minirpc/transport/netty/NettyTransportServer.java`
+- 新增：`minirpc-transport-netty/src/main/java/top/ainexur/minirpc/transport/netty/SimpleConnectionManager.java`
+- 新增：`minirpc-transport-netty/src/main/java/top/ainexur/minirpc/transport/netty/RequestInFlight.java`
+- 新增：`minirpc-transport-netty/src/main/java/top/ainexur/minirpc/transport/netty/codec/NettyMessageDecoder.java`
+- 新增：`minirpc-transport-netty/src/main/java/top/ainexur/minirpc/transport/netty/codec/NettyMessageEncoder.java`
+- 新增：`minirpc-transport-netty/src/main/java/top/ainexur/minirpc/transport/netty/handler/ClientResponseHandler.java`
+- 新增：`minirpc-transport-netty/src/main/java/top/ainexur/minirpc/transport/netty/handler/ServerRequestHandler.java`
+- 新增：`minirpc-transport-netty/src/test/java/top/ainexur/minirpc/transport/netty/NettyTransportIntegrationTest.java`
+
+改动细节：
+- 定义了传输层基础接口（TransportClient/TransportServer/ConnectionManager/RequestHandler）与 Endpoint 模型。
+- Netty 客户端：
+  - 通过 DefaultMessageCodec + Frame 编解码，完成对象与字节的转换。
+  - 维护 inflight 映射，保证 requestId 能匹配响应并完成 future。
+- Netty 服务端：
+  - 使用虚拟线程执行 RequestHandler，避免阻塞 Netty IO 线程。
+  - 统一在异常时返回 SERVER_ERROR 响应。
+- 集成测试：
+  - 请求响应闭环（IT-T1）。
+  - 并发 1k 请求完成性（IT-T2）。
+  - 验证业务处理线程为虚拟线程（IT-T3）。
+ - 修正服务端写回响应的 outbound 起点：
+   - 从 `ctx.writeAndFlush` 改为 `ctx.channel().writeAndFlush`，确保 outbound 经过 MessageEncoder 再到 FrameEncoder。
+ - IT-T3 校验方式调整：
+   - 由线程名包含 “VirtualThread” 改为 `Thread.currentThread().isVirtual()`，避免 JVM 实现差异导致的误判。
+
+关键决策与思考：
+- 传输层接口先落地在 transport 模块，E1.4 可以直接依赖接口而不耦合 Netty 实现。
+- Pipeline 顺序刻意保证“消息编码 → 帧编码”的 outbound 顺序，避免对象直接落到 FrameEncoder。
+- RequestInFlight 仅处理 requestId 与 future 的映射，超时/重试留给 E2 治理阶段统一处理。
+
+验证记录：
+- `mvn -pl minirpc-transport-netty -am test` 通过（包含 NettyTransportIntegrationTest 与 NettyFrameSlicerTest）。
+
 ### 2026-01-02 协议解析拆分为 Protocol + Netty 切帧（本次改动）
 改动目标：
 - 明确分层边界：Netty 只负责凑齐一帧字节，Protocol 只负责解析/编码帧语义。
