@@ -152,28 +152,48 @@ public record RpcResponse(
 ) {}
 ```
 
-### 3.6 Netty Codecs (signatures)
+### 3.6 Frame Parse/Encode (Protocol) + Netty Frame Slicer
 ```java
-package top.ainexur.minirpc.protocol.codec;
+package top.ainexur.minirpc.protocol.codec.frame;
 
 import top.ainexur.minirpc.protocol.frame.MiniRpcFrame;
+
+public final class FrameParser {
+    public MiniRpcFrame parse(byte[] frameBytes) {
+        // validate magic/version/length, then parse fields
+    }
+}
+
+public final class FrameEncoder {
+    public byte[] encode(MiniRpcFrame frame) {
+        // encode fixed header + ext header + body
+    }
+}
+```
+
+```java
+package top.ainexur.minirpc.transport.netty.codec;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.MessageToByteEncoder;
 import java.util.List;
+import top.ainexur.minirpc.protocol.codec.frame.FrameParser;
+import top.ainexur.minirpc.protocol.codec.frame.FrameEncoder;
+import top.ainexur.minirpc.protocol.frame.MiniRpcFrame;
 
-public final class MiniRpcFrameDecoder extends ByteToMessageDecoder {
+public final class NettyFrameSlicer extends ByteToMessageDecoder {
     @Override
-    protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        // implement per PROTOCOL: read 22B -> validate -> skip ext -> read body
+    protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) {
+        // only slice full frame bytes, then use FrameParser
     }
 }
 
-public final class MiniRpcFrameEncoder extends MessageToByteEncoder<MiniRpcFrame> {
+public final class NettyFrameEncoder extends MessageToByteEncoder<MiniRpcFrame> {
     @Override
-    protected void encode(ChannelHandlerContext ctx, MiniRpcFrame msg, ByteBuf out) throws Exception {
-        // implement fixed header + ext header + body
+    protected void encode(ChannelHandlerContext ctx, MiniRpcFrame msg, ByteBuf out) {
+        // use FrameEncoder to write bytes
     }
 }
 ```
@@ -278,7 +298,7 @@ public interface ConnectionManager {
 ### 5.3 Netty implementation contracts
 - `NettyTransportServer`:
   - Starts `ServerBootstrap`
-  - Pipeline must include `MiniRpcFrameDecoder` + `MessageCodec` decode to `RpcRequest`
+  - Pipeline must include `NettyFrameSlicer` + `MessageCodec` decode to `RpcRequest`
   - Dispatch to provider via `RequestHandler`
   - Encode `RpcResponse` → frame
 
