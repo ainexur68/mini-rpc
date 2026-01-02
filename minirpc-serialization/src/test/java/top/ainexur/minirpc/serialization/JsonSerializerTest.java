@@ -2,6 +2,7 @@ package top.ainexur.minirpc.serialization;
 
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -13,7 +14,9 @@ class JsonSerializerTest {
         byte[] bytes = serializer.serialize(req);
         TestRequest back = serializer.deserialize(bytes, TestRequest.class);
         assertNotNull(back);
-        assertEquals(req, back);
+        assertEquals(req.service(), back.service());
+        assertEquals(req.method(), back.method());
+        assertArrayEquals(req.args(), back.args());
     }
 
     @Test
