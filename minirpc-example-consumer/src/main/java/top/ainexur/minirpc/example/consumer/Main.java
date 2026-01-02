@@ -1,5 +1,11 @@
 package top.ainexur.minirpc.example.consumer;
 
+import top.ainexur.minirpc.core.consumer.ReferenceFactory;
+import top.ainexur.minirpc.example.provider.service.HelloService;
+import top.ainexur.minirpc.transport.Endpoint;
+import top.ainexur.minirpc.transport.TransportClient;
+import top.ainexur.minirpc.transport.netty.NettyTransportClient;
+
 /**
  * Consumer 示例入口。
  */
@@ -12,14 +18,18 @@ public class Main {
      * @param args 参数
      */
     public static void main(String[] args) {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        System.out.printf("Hello and welcome!");
+        String host = args.length > 0 ? args[0] : "127.0.0.1";
+        int port = args.length > 1 ? Integer.parseInt(args[1]) : 8080;
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            System.out.println("i = " + i);
+        TransportClient client = new NettyTransportClient();
+        try {
+            Endpoint endpoint = new Endpoint(host, port);
+            ReferenceFactory factory = new ReferenceFactory(client, endpoint);
+            HelloService service = factory.getProxy(HelloService.class);
+            String result = service.hello("world");
+            System.out.println("result=" + result);
+        } finally {
+            client.close();
         }
     }
 }

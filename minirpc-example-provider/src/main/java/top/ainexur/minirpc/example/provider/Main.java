@@ -1,5 +1,12 @@
 package top.ainexur.minirpc.example.provider;
 
+import top.ainexur.minirpc.core.provider.ProviderDispatcher;
+import top.ainexur.minirpc.core.provider.ServiceExporter;
+import top.ainexur.minirpc.example.provider.service.HelloService;
+import top.ainexur.minirpc.example.provider.service.HelloServiceImpl;
+import top.ainexur.minirpc.transport.TransportServer;
+import top.ainexur.minirpc.transport.netty.NettyTransportServer;
+
 /**
  * Provider 示例入口。
  */
@@ -11,15 +18,18 @@ public class Main {
      *
      * @param args 参数
      */
-    public static void main(String[] args) {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        System.out.printf("Hello and welcome!");
+    public static void main(String[] args) throws InterruptedException {
+        int port = args.length > 0 ? Integer.parseInt(args[0]) : 8080;
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            System.out.println("i = " + i);
-        }
+        ServiceExporter exporter = new ServiceExporter();
+        exporter.register(HelloService.class, new HelloServiceImpl());
+        ProviderDispatcher dispatcher = new ProviderDispatcher(exporter);
+
+        TransportServer server = new NettyTransportServer(dispatcher::dispatch);
+        server.start(port);
+        System.out.println("MiniRPC provider started on port " + server.port());
+
+        Runtime.getRuntime().addShutdownHook(new Thread(server::stop));
+        Thread.currentThread().join();
     }
 }
