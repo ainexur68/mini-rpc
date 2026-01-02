@@ -1,5 +1,8 @@
 package top.ainexur.minirpc.protocol;
 
+/**
+ * MiniRPC 协议常量定义。
+ */
 public final class MiniRpcProtocol {
     public static final short MAGIC = (short) 0xCAFE;
     public static final byte VERSION = 1;

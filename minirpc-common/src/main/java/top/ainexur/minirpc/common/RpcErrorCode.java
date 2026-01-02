@@ -1,5 +1,8 @@
 package top.ainexur.minirpc.common;
 
+/**
+ * RPC 错误码枚举。
+ */
 public enum RpcErrorCode {
     OK(0),
     TIMEOUT(1),
@@ -12,6 +15,9 @@ public enum RpcErrorCode {
     TOO_LARGE_REQUEST(10),
     UNSUPPORTED_SERIALIZE_TYPE(21);
 
+    /**
+     * 业务可用的整数错误码。
+     */
     public final int code;
 
     RpcErrorCode(int code) {

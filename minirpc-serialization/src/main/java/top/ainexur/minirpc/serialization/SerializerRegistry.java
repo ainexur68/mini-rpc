@@ -7,10 +7,16 @@ import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * 序列化器注册表，基于 ServiceLoader 加载。
+ */
 public class SerializerRegistry {
 
     private final Map<Byte, Serializer> byType = new ConcurrentHashMap<>();
 
+    /**
+     * 构造注册表并加载已注册的序列化器。
+     */
     public SerializerRegistry() {
         ServiceLoader.load(Serializer.class)
                 .forEach(this::register);
@@ -28,6 +34,12 @@ public class SerializerRegistry {
         }
     }
 
+    /**
+     * 获取指定类型的序列化器，未找到则抛异常。
+     *
+     * @param type 序列化类型
+     * @return 序列化器
+     */
     public Serializer required(byte type) {
         Serializer serializer = byType.get(type);
         if (serializer == null) {

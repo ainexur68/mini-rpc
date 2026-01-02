@@ -10,7 +10,16 @@ import java.util.stream.IntStream;
 /**
  * 简单压测客户端：大量并发连接到背压服务器，观测拒绝/通过情况。
  */
+/**
+ * PoC：长连接压测客户端。
+ */
 public class BackpressureLoadClient {
+    /**
+     * 应用入口。
+     *
+     * @param args 参数
+     * @throws Exception 异常
+     */
     public static void main(String[] args) throws Exception {
         int total = getIntArg(args, 0, 50000);   // 请求总数
         int threads = getIntArg(args, 1, 100);   // 发送线程数

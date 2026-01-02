@@ -5,7 +5,16 @@ import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+/**
+ * PoC：基础 TCP 服务端示例。
+ */
 public class TcpServer {
+    /**
+     * 应用入口。
+     *
+     * @param args 参数
+     * @throws IOException IO 异常
+     */
     public static void main(String[] args) throws IOException {
         ServerSocket serverSocket = new ServerSocket(8888);
         System.out.println("server started at port 8888");

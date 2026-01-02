@@ -3,7 +3,15 @@ package poc3;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
+/**
+ * PoC：Kryo 并发安全使用示例。
+ */
 public class KryoPoC {
+    /**
+     * 应用入口。
+     *
+     * @param args 参数
+     */
     public static void main(String[] args) {
         int total = 200000;
 

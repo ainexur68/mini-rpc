@@ -26,6 +26,13 @@ public class NettyMessageEncoder extends MessageToMessageEncoder<Object> {
         this.codec = codec;
     }
 
+    /**
+     * 编码业务对象为协议帧。
+     *
+     * @param ctx 上下文
+     * @param msg 业务对象
+     * @param out 输出对象列表
+     */
     @Override
     protected void encode(ChannelHandlerContext ctx, Object msg, List<Object> out) {
         MiniRpcFrame frame;

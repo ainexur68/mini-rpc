@@ -8,6 +8,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+/**
+ * PoC：Kryo 线程隔离封装。
+ */
 public class KryoSafeSupport {
     private static final ThreadLocal<Kryo> KRYO_LOCAL = ThreadLocal.withInitial(() -> {
         Kryo kryo = new Kryo();
@@ -19,6 +22,12 @@ public class KryoSafeSupport {
         return kryo;
     });
 
+    /**
+     * 序列化对象。
+     *
+     * @param obj 对象
+     * @return 字节数组
+     */
     public static byte[] serialize(Object obj) {
         Kryo kryo = KRYO_LOCAL.get();
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -31,6 +40,14 @@ public class KryoSafeSupport {
         }
     }
 
+    /**
+     * 反序列化对象。
+     *
+     * @param arr  字节数组
+     * @param type 目标类型
+     * @param <T>  目标类型
+     * @return 反序列化对象
+     */
     public static <T> T deserialize(byte[] arr, Class<T> type) {
         Kryo kryo = KRYO_LOCAL.get();
         try (ByteArrayInputStream bis = new ByteArrayInputStream(arr);

@@ -13,7 +13,15 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Executors;
 
+/**
+ * PoC：Netty 服务端 + 虚拟线程业务执行。
+ */
 public class VirtualThreadNettyServer {
+    /**
+     * 应用入口。
+     *
+     * @param args 参数
+     */
     public static void main(String[] args) {
         // 1. Netty线程组
         var boos = new NioEventLoopGroup(1);

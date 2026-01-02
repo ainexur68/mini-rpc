@@ -17,6 +17,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
 
+/**
+ * PoC：虚拟线程并发下的 Kryo 不安全示例。
+ */
 public class KryoVirtualThreadBadPoC {
 
     // ❌ 故意错误：共享一个 Kryo 实例供所有虚拟线程使用
@@ -30,6 +33,12 @@ public class KryoVirtualThreadBadPoC {
         // KRYO.register(OtherRequest.class, 11);
     }
 
+    /**
+     * 应用入口。
+     *
+     * @param args 参数
+     * @throws Exception 异常
+     */
     public static void main(String[] args) throws Exception {
         int total = Integer.getInteger("poc.total", 200_000); // 次数越大，越容易暴露问题
         int maxConcurrency = Integer.getInteger("poc.maxConcurrency", total);

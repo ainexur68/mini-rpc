@@ -7,7 +7,16 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
+/**
+ * PoC：短连接压测客户端。
+ */
 public class BackpressureLoadClientShortConnect {
+    /**
+     * 应用入口。
+     *
+     * @param args 参数
+     * @throws Exception 异常
+     */
     public static void main(String[] args) throws Exception {
         int total = 20000;
         int threads = 200;

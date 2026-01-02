@@ -6,11 +6,20 @@ import io.netty.buffer.Unpooled;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * PoC：固定头解码的半包/粘包验证。
+ */
 public class DecoderPoCTest {
 
     static final int FIXED_HEADER_LEN = 22;
     static final short MAGIC = (short) 0xCAFE;
 
+    /**
+     * 应用入口。
+     *
+     * @param args 参数
+     * @throws Exception 异常
+     */
     public static void main(String[] args) throws Exception {
         MiniRpcDecoder decoder = new MiniRpcDecoder();
         ByteBuf buf = Unpooled.buffer();

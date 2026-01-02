@@ -28,6 +28,12 @@ public class ServerRequestHandler extends SimpleChannelInboundHandler<Object> {
         this.executor = executor;
     }
 
+    /**
+     * 接收请求并提交到业务线程处理。
+     *
+     * @param ctx 上下文
+     * @param msg 解码后的消息
+     */
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) {
         if (!(msg instanceof RpcRequest request)) {
@@ -49,6 +55,12 @@ public class ServerRequestHandler extends SimpleChannelInboundHandler<Object> {
         });
     }
 
+    /**
+     * 异常时关闭通道。
+     *
+     * @param ctx   上下文
+     * @param cause 异常
+     */
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         ctx.close();

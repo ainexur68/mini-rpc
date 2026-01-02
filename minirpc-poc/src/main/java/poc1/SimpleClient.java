@@ -8,7 +8,16 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
 
+/**
+ * PoC：简单客户端压测。
+ */
 public class SimpleClient {
+    /**
+     * 应用入口。
+     *
+     * @param args 参数
+     * @throws InterruptedException 线程中断
+     */
     public static void main(String[] args) throws InterruptedException {
         int total = 50000;
         int threads = 32;

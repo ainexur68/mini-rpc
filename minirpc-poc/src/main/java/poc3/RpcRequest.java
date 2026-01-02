@@ -1,5 +1,8 @@
 package poc3;
 
+/**
+ * PoC 请求对象模型。
+ */
 public class RpcRequest {
     public String service;
     public String method;

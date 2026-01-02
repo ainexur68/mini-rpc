@@ -7,12 +7,23 @@ import io.netty.handler.codec.DecoderException;
 
 import java.util.List;
 
+/**
+ * PoC：固定头解码器实现。
+ */
 public class MiniRpcDecoder extends ByteToMessageDecoder {
 
     private static final int FIXED_HEADER_LEN = 22;
 
     private static final short MAGIC = (short) 0xCAFE;
 
+    /**
+     * 解码输入字节流为帧描述。
+     *
+     * @param ctx 上下文
+     * @param in  输入缓冲区
+     * @param out 输出对象列表
+     * @throws Exception 异常
+     */
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
         while (true) {

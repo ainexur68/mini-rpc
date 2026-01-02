@@ -14,7 +14,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * PoC: 在 Netty IO 线程与虚拟线程业务之间加上背压/拒绝控制，验证虚拟线程不会“放飞”导致内存/CPU 撑爆。
+ * PoC：在 Netty IO 线程与虚拟线程业务之间加上背压/拒绝控制。
  */
 public class VirtualThreadBackpressureServer {
 
@@ -22,6 +22,12 @@ public class VirtualThreadBackpressureServer {
     private static final int MAX_IN_FLIGHT = Integer.getInteger("poc.maxInFlight", 1000);
     private static final Duration BIZ_COST = Duration.ofMillis(Long.getLong("poc.bizMs", 10L));
 
+    /**
+     * 应用入口。
+     *
+     * @param args 参数
+     * @throws Exception 异常
+     */
     public static void main(String[] args) throws Exception {
         var boss = new NioEventLoopGroup(1);
         var worker = new NioEventLoopGroup();

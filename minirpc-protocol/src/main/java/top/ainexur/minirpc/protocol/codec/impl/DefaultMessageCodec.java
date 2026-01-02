@@ -8,23 +8,46 @@ import top.ainexur.minirpc.protocol.message.RpcResponse;
 import top.ainexur.minirpc.serialization.Serializer;
 import top.ainexur.minirpc.serialization.SerializerRegistry;
 
+/**
+ * 默认消息编解码实现，基于 SerializerRegistry。
+ */
 public class DefaultMessageCodec implements MessageCodec {
     private final SerializerRegistry registry;
     private final byte defaultSerializeType;
 
+    /**
+     * 使用默认序列化类型构造编解码器。
+     */
     public DefaultMessageCodec() {
         this(new SerializerRegistry(), (byte) 0);
     }
 
+    /**
+     * 使用指定默认序列化类型构造编解码器。
+     *
+     * @param defaultSerializeType 默认序列化类型
+     */
     public DefaultMessageCodec(byte defaultSerializeType) {
         this(new SerializerRegistry(), defaultSerializeType);
     }
 
+    /**
+     * 构造编解码器。
+     *
+     * @param registry             序列化器注册表
+     * @param defaultSerializeType 默认序列化类型
+     */
     public DefaultMessageCodec(SerializerRegistry registry, byte defaultSerializeType) {
         this.registry = registry;
         this.defaultSerializeType = defaultSerializeType;
     }
 
+    /**
+     * 编码请求为协议帧。
+     *
+     * @param request 请求对象
+     * @return 协议帧
+     */
     @Override
     public MiniRpcFrame encodeRequest(RpcRequest request) {
         Serializer serializer = registry.required(defaultSerializeType);
@@ -38,6 +61,12 @@ public class DefaultMessageCodec implements MessageCodec {
         );
     }
 
+    /**
+     * 编码响应为协议帧。
+     *
+     * @param response 响应对象
+     * @return 协议帧
+     */
     @Override
     public MiniRpcFrame encodeResponse(RpcResponse response) {
         Serializer serializer = registry.required(defaultSerializeType);
@@ -51,6 +80,12 @@ public class DefaultMessageCodec implements MessageCodec {
         );
     }
 
+    /**
+     * 解码协议帧为请求或响应对象。
+     *
+     * @param frame 协议帧
+     * @return 解码后的对象
+     */
     @Override
     public Object decode(MiniRpcFrame frame) {
         Serializer serializer = registry.required(frame.serializeType());

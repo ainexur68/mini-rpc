@@ -11,9 +11,19 @@ import top.ainexur.minirpc.protocol.frame.MiniRpcFrame;
 
 import java.util.List;
 
+/**
+ * Netty 解码器，将字节流切分为完整的 MiniRpcFrame。
+ */
 public class NettyFrameSlicer extends ByteToMessageDecoder {
     private final FrameParser parser = new FrameParser();
 
+    /**
+     * 按固定头长度与扩展头/体长度切分帧。
+     *
+     * @param ctx 上下文
+     * @param in  输入缓冲区
+     * @param out 输出对象列表
+     */
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) {
         if (in.readableBytes() < MiniRpcProtocol.FIXED_HEADER_SIZE) {

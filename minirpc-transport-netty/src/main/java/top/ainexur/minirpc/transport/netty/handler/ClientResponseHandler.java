@@ -21,6 +21,12 @@ public class ClientResponseHandler extends SimpleChannelInboundHandler<Object> {
         this.inflight = inflight;
     }
 
+    /**
+     * 处理响应并完成对应 future。
+     *
+     * @param ctx 上下文
+     * @param msg 解码后的消息
+     */
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) {
         if (msg instanceof RpcResponse response) {
@@ -28,11 +34,22 @@ public class ClientResponseHandler extends SimpleChannelInboundHandler<Object> {
         }
     }
 
+    /**
+     * 通道失活时，失败所有未完成请求。
+     *
+     * @param ctx 上下文
+     */
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
         inflight.failAll(RpcErrorCode.CONNECTION_CLOSED, "channel inactive");
     }
 
+    /**
+     * 异常时关闭通道并失败请求。
+     *
+     * @param ctx   上下文
+     * @param cause 异常
+     */
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         inflight.failAll(RpcErrorCode.CONNECTION_CLOSED, cause.getMessage());

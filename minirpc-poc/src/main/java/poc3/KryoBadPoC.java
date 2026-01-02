@@ -9,6 +9,9 @@ import java.io.ByteArrayOutputStream;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
+/**
+ * PoC：Kryo 并发不安全示例。
+ */
 public class KryoBadPoC {
 
     // ❶ 错误点：一个静态单例，被多个线程共享
@@ -19,6 +22,11 @@ public class KryoBadPoC {
         KRYO.setRegistrationRequired(false);
     }
 
+    /**
+     * 应用入口。
+     *
+     * @param args 参数
+     */
     public static void main(String[] args) {
         int total = 300000; // 提高次数，提升复现确定性
 

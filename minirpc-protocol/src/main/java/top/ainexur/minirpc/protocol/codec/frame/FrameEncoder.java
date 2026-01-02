@@ -5,7 +5,16 @@ import top.ainexur.minirpc.protocol.frame.MiniRpcFrame;
 
 import java.nio.ByteBuffer;
 
+/**
+ * 协议帧编码器，将 MiniRpcFrame 编码为字节数组。
+ */
 public final class FrameEncoder {
+    /**
+     * 编码协议帧。
+     *
+     * @param frame 协议帧
+     * @return 编码后的字节数组
+     */
     public byte[] encode(MiniRpcFrame frame) {
         int headerLen = frame.headerLength();
         int bodyLen = frame.bodyLength();

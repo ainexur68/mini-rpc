@@ -5,7 +5,16 @@ import top.ainexur.minirpc.common.RpcException;
 import top.ainexur.minirpc.protocol.MiniRpcProtocol;
 import top.ainexur.minirpc.protocol.frame.MiniRpcFrame;
 
+/**
+ * 协议帧解析器，将字节数组解析为 MiniRpcFrame。
+ */
 public final class FrameParser {
+    /**
+     * 解析协议帧字节数组。
+     *
+     * @param frameBytes 帧字节数组
+     * @return 协议帧对象
+     */
     public MiniRpcFrame parse(byte[] frameBytes) {
         if (frameBytes == null || frameBytes.length < MiniRpcProtocol.FIXED_HEADER_SIZE) {
             throw new RpcException(RpcErrorCode.BAD_REQUEST, "frame too short");
