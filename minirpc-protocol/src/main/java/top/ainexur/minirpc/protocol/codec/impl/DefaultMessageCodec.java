@@ -9,11 +9,25 @@ import top.ainexur.minirpc.serialization.Serializer;
 import top.ainexur.minirpc.serialization.SerializerRegistry;
 
 public class DefaultMessageCodec implements MessageCodec {
-    private final SerializerRegistry registry = new SerializerRegistry();
+    private final SerializerRegistry registry;
+    private final byte defaultSerializeType;
+
+    public DefaultMessageCodec() {
+        this(new SerializerRegistry(), (byte) 0);
+    }
+
+    public DefaultMessageCodec(byte defaultSerializeType) {
+        this(new SerializerRegistry(), defaultSerializeType);
+    }
+
+    public DefaultMessageCodec(SerializerRegistry registry, byte defaultSerializeType) {
+        this.registry = registry;
+        this.defaultSerializeType = defaultSerializeType;
+    }
 
     @Override
     public MiniRpcFrame encodeRequest(RpcRequest request) {
-        Serializer serializer = registry.required((byte) 0);
+        Serializer serializer = registry.required(defaultSerializeType);
         byte[] body = serializer.serialize(request);
         return new MiniRpcFrame(
                 serializer.serializeType(),
@@ -26,7 +40,7 @@ public class DefaultMessageCodec implements MessageCodec {
 
     @Override
     public MiniRpcFrame encodeResponse(RpcResponse response) {
-        Serializer serializer = registry.required((byte) 0);
+        Serializer serializer = registry.required(defaultSerializeType);
         byte[] body = serializer.serialize(response);
         return new MiniRpcFrame(
                 serializer.serializeType(),
