@@ -124,6 +124,89 @@ E1 进度条：[####------] 40%
 验证记录：
 - `mvn -pl minirpc-transport-netty -am test` 通过（包含 NettyTransportIntegrationTest 与 NettyFrameSlicerTest）。
 
+### 2026-01-02 完成 E1.4 Core 代理/分发最小链路
+改动目标：
+- 落地 Core 侧 ServiceExporter / ProviderDispatcher / ReferenceFactory。
+- 增加最小 Filter 链骨架与端到端集成测试。
+- 提供可运行的 provider/consumer 示例。
+
+新增/修改文件：
+- 新增：`minirpc-core/src/main/java/top/ainexur/minirpc/core/Invocation.java`
+- 新增：`minirpc-core/src/main/java/top/ainexur/minirpc/core/filter/Filter.java`
+- 新增：`minirpc-core/src/main/java/top/ainexur/minirpc/core/filter/FilterChain.java`
+- 新增：`minirpc-core/src/main/java/top/ainexur/minirpc/core/filter/DefaultFilterChain.java`
+- 新增：`minirpc-core/src/main/java/top/ainexur/minirpc/core/provider/ServiceExporter.java`
+- 新增：`minirpc-core/src/main/java/top/ainexur/minirpc/core/provider/ProviderDispatcher.java`
+- 新增：`minirpc-core/src/main/java/top/ainexur/minirpc/core/consumer/ReferenceFactory.java`
+- 修改：`minirpc-core/pom.xml`
+- 新增：`minirpc-core/src/test/java/top/ainexur/minirpc/core/EndToEndTest.java`
+- 修改：`minirpc-example-provider/pom.xml`
+- 修改：`minirpc-example-consumer/pom.xml`
+- 修改：`minirpc-example-provider/src/main/java/top/ainexur/minirpc/example/provider/Main.java`
+- 新增：`minirpc-example-provider/src/main/java/top/ainexur/minirpc/example/provider/service/HelloService.java`
+- 新增：`minirpc-example-provider/src/main/java/top/ainexur/minirpc/example/provider/service/HelloServiceImpl.java`
+- 修改：`minirpc-example-consumer/src/main/java/top/ainexur/minirpc/example/consumer/Main.java`
+- 新增：`minirpc-example-consumer/src/main/java/top/ainexur/minirpc/example/provider/service/HelloService.java`
+
+改动细节：
+- ServiceExporter 以接口名为 key 管理实现对象，ProviderDispatcher 负责反射调用并封装响应。
+- ReferenceFactory 使用 JDK 动态代理构造 RpcRequest，并通过 FilterChain -> TransportClient 发送请求。
+- Provider 侧通过 RequestHandler 包装 ProviderDispatcher；Consumer 侧通过 ReferenceFactory 调用示例服务。
+- 引入最小 Filter 链结构，便于后续治理能力（超时/重试/Trace）挂接。
+
+关键决策与思考：
+- FilterChain 先做“可用最小实现”，只保证顺序执行与终止执行器，避免过早设计。
+- 示例接口不单独新建模块，暂用 provider/consumer 各自定义同名接口以保持对齐。
+- 当响应非 OK 时，优先透出服务端错误信息，降低联调成本。
+
+验证记录：
+- `mvn -pl minirpc-core -am test` 通过（包含 EndToEndTest）。
+
+归档输出（按固定模板）：
+- 将修改的文件列表：
+  - docs/progress_log.md
+  - docs/steps_checklist.md
+  - minirpc-core/pom.xml
+  - minirpc-core/src/main/java/top/ainexur/minirpc/core/Invocation.java
+  - minirpc-core/src/main/java/top/ainexur/minirpc/core/consumer/ReferenceFactory.java
+  - minirpc-core/src/main/java/top/ainexur/minirpc/core/filter/DefaultFilterChain.java
+  - minirpc-core/src/main/java/top/ainexur/minirpc/core/filter/Filter.java
+  - minirpc-core/src/main/java/top/ainexur/minirpc/core/filter/FilterChain.java
+  - minirpc-core/src/main/java/top/ainexur/minirpc/core/provider/ProviderDispatcher.java
+  - minirpc-core/src/main/java/top/ainexur/minirpc/core/provider/ServiceExporter.java
+  - minirpc-core/src/test/java/top/ainexur/minirpc/core/EndToEndTest.java
+  - minirpc-example-consumer/pom.xml
+  - minirpc-example-consumer/src/main/java/top/ainexur/minirpc/example/consumer/Main.java
+  - minirpc-example-consumer/src/main/java/top/ainexur/minirpc/example/provider/service/HelloService.java
+  - minirpc-example-provider/pom.xml
+  - minirpc-example-provider/src/main/java/top/ainexur/minirpc/example/provider/Main.java
+  - minirpc-example-provider/src/main/java/top/ainexur/minirpc/example/provider/service/HelloService.java
+  - minirpc-example-provider/src/main/java/top/ainexur/minirpc/example/provider/service/HelloServiceImpl.java
+- 每个文件的修改点（bullet）：
+  - docs/progress_log.md：记录 E1.4 完成情况、决策、验证与归档信息
+  - docs/steps_checklist.md：标记 E1.4 任务完成
+  - minirpc-core/pom.xml：引入 JUnit 依赖与 surefire 配置
+  - minirpc-core/src/main/java/top/ainexur/minirpc/core/Invocation.java：新增调用上下文对象
+  - minirpc-core/src/main/java/top/ainexur/minirpc/core/consumer/ReferenceFactory.java：动态代理构造请求并发送，增强错误透出
+  - minirpc-core/src/main/java/top/ainexur/minirpc/core/filter/DefaultFilterChain.java：实现顺序过滤器链
+  - minirpc-core/src/main/java/top/ainexur/minirpc/core/filter/Filter.java：定义过滤器接口
+  - minirpc-core/src/main/java/top/ainexur/minirpc/core/filter/FilterChain.java：定义过滤器链接口
+  - minirpc-core/src/main/java/top/ainexur/minirpc/core/provider/ProviderDispatcher.java：反射分发并封装响应
+  - minirpc-core/src/main/java/top/ainexur/minirpc/core/provider/ServiceExporter.java：注册与获取服务实现
+  - minirpc-core/src/test/java/top/ainexur/minirpc/core/EndToEndTest.java：端到端链路与异常路径测试
+  - minirpc-example-consumer/pom.xml：增加对 core 依赖
+  - minirpc-example-consumer/src/main/java/top/ainexur/minirpc/example/consumer/Main.java：消费端调用示例
+  - minirpc-example-consumer/src/main/java/top/ainexur/minirpc/example/provider/service/HelloService.java：示例接口（consumer 侧）
+  - minirpc-example-provider/pom.xml：增加对 core 依赖
+  - minirpc-example-provider/src/main/java/top/ainexur/minirpc/example/provider/Main.java：提供端启动示例
+  - minirpc-example-provider/src/main/java/top/ainexur/minirpc/example/provider/service/HelloService.java：示例接口（provider 侧）
+  - minirpc-example-provider/src/main/java/top/ainexur/minirpc/example/provider/service/HelloServiceImpl.java：示例实现
+- 风险点与测试点：
+  - 风险：consumer/provider 使用重复包名接口，未抽公共 API 模块
+  - 风险：ReferenceFactory 使用 join 阻塞，后续治理需替换为超时/异步
+  - 风险：ProviderDispatcher 反射调用未做缓存
+  - 测试：`mvn -pl minirpc-core -am test`
+
 ### 2026-01-02 协议解析拆分为 Protocol + Netty 切帧（本次改动）
 改动目标：
 - 明确分层边界：Netty 只负责凑齐一帧字节，Protocol 只负责解析/编码帧语义。

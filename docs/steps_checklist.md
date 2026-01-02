@@ -37,11 +37,11 @@
 - [x] IT-T3 业务不在 Netty IO 线程（虚拟线程）
 
 ### E1.4 Core：Proxy + Provider Dispatch（本地内存注册）
-- [ ] T1.4.1 `ServiceExporter`
-- [ ] T1.4.2 `ProviderDispatcher`（反射调用）
-- [ ] T1.4.3 `ReferenceFactory`（JDK 动态代理）
-- [ ] T1.4.4 Filter chain 最小骨架
-- [ ] IT-C1 完整链路 `HelloService#hello("x") -> "Hello x"`
+- [x] T1.4.1 `ServiceExporter`
+- [x] T1.4.2 `ProviderDispatcher`（反射调用）
+- [x] T1.4.3 `ReferenceFactory`（JDK 动态代理）
+- [x] T1.4.4 Filter chain 最小骨架
+- [x] IT-C1 完整链路 `HelloService#hello("x") -> "Hello x"`
 - [ ] UT-C2 方法重载解析正确（若存在）
 
 ## E2 — 治理 MVP（超时 + 重试 + Trace + 日志）
