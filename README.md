@@ -2,35 +2,88 @@
 
 [中文说明](README_CN.md)
 
-MiniRPC is a lightweight, modular RPC framework built with Java 21 and Netty. It focuses on clear protocol framing,
-pluggable components, and a small, testable core so each layer can evolve independently.
+MiniRPC is a **Dubbo-lite** RPC framework built for **learning + showcasing engineering ability**: you can follow the whole
+call path end-to-end (proxy → codec → transport → dispatch), while keeping the design modular and extensible.
 
-## Overview
-- Custom binary protocol with fixed header + extensible header + body
-- Netty-based transport pipeline and framing
-- Pluggable serialization, registry, load balancing, and governance hooks
-- Runnable provider/consumer examples for verification
+- **JDK**: 21 (Virtual Threads)
+- **Transport**: Netty TCP long connection
+- **Protocol**: custom binary framing (fixed 22B header + extensible header + body)
+- **Extensibility**: Java SPI (`ServiceLoader`) for pluggable components
 
-## Status
-This repository tracks the E1/Beta implementation. See `docs/progress_log.md` for current progress and decisions.
+> ⚠️ This project is **NOT** a production-ready RPC solution (no TLS/auth, minimal governance).  
+> It is designed for **understanding RPC fundamentals** and as a **readable portfolio project**.
+
+---
+
+## What’s implemented (E1 / Beta)
+
+✅ **Binary framing protocol**
+- Big-endian, fixed header 22 bytes
+- Extensible header supported (currently unused, `headerLen = 0` in E1)
+- Sticky/half packet handled via Netty frame slicing
+
+✅ **Netty transport**
+- Client/Server request-response over TCP
+- `requestId -> CompletableFuture` in-flight correlation
+- Provider business logic runs on **Java 21 virtual threads** (IO threads do not execute business)
+
+✅ **Serialization (SPI)**
+- JSON serializer (`serializeType = 0`) via `ServiceLoader`
+
+✅ **Core call chain**
+- Consumer: JDK dynamic proxy builds `RpcRequest`
+- Provider: reflection-based dispatcher invokes target method
+- Runnable examples: Provider & Consumer
+
+✅ **Tests**
+- Protocol parsing & validation
+- Netty frame slicing (half/sticky packets)
+- Transport integration test
+- End-to-end proxy test
+
+---
+
+## Roadmap (next milestones)
+
+- **E2 Governance**
+  - Timeout (client side)
+  - Retry (max once, only for retryable failures)
+  - TraceId injection + structured logging (Filter chain)
+- **E3 Registry + LoadBalancer**
+  - Redis registry (TTL + renewal + Pub/Sub notifications)
+  - Client-side LoadBalancer (Random / RoundRobin) via SPI
+- **E4 Heartbeat + resilience**
+  - Heartbeat frame (`flags.heartbeat`)
+  - Reconnect strategy + fail-fast inflight on channel inactive
+
+Progress tracking:
+- `docs/progress_log.md`
+- `docs/steps_checklist.md`
+
+---
 
 ## Quick Start
-Build all example dependencies:
+
+### Requirements
+- JDK 21
+- Maven 3.8+
+
+### Build examples
 ```bash
 mvn -pl minirpc-example-provider,minirpc-example-consumer -am package
 ```
 
-Run the entry points from your IDE:
-- Provider: `top.ainexur.minirpc.example.provider.Main` (arg: port, default 8080)
-- Consumer: `top.ainexur.minirpc.example.consumer.Main` (args: host, port)
+### Run (IDE)
+- Provider: `top.ainexur.minirpc.example.provider.Main` (args: `port`, default `8080`)
+- Consumer: `top.ainexur.minirpc.example.consumer.Main` (args: `host port`, default `127.0.0.1 8080`)
 
-Start the provider first, then run the consumer to see a request/response round-trip.
+Start Provider first, then run Consumer to see a request/response round-trip.
 
-CLI run (no exec plugin required):
+### Run (CLI, no exec plugin required)
 ```bash
 mvn -pl minirpc-example-provider -am -DskipTests package dependency:copy-dependencies
 java -cp "minirpc-example-provider/target/classes:minirpc-example-provider/target/dependency/*" \
-  top.ainexur.minirpc.example.provider.Main
+  top.ainexur.minirpc.example.provider.Main 8080
 ```
 
 ```bash
@@ -39,71 +92,139 @@ java -cp "minirpc-example-consumer/target/classes:minirpc-example-consumer/targe
   top.ainexur.minirpc.example.consumer.Main 127.0.0.1 8080
 ```
 
-## Requirements
-- JDK 21
-- Maven 3.8+
+> Windows: replace `:` with `;` in the `-cp` classpath.
 
-## Building
-```bash
-mvn -DskipTests package
+---
+
+## Architecture (call flow)
+
+```mermaid
+sequenceDiagram
+    participant App as User Code
+    participant Proxy as JDK Proxy (ReferenceFactory)
+    participant Chain as FilterChain (Core/Governance)
+    participant Client as NettyTransportClient
+    participant Server as NettyTransportServer
+    participant Dispatch as ProviderDispatcher
+    participant Impl as Service Impl
+
+    App->>Proxy: hello("mini")
+    Proxy->>Chain: build RpcRequest(requestId)
+    Chain->>Client: send(endpoint, request)
+    Client->>Server: TCP bytes (MiniRPC frame)
+    Server->>Dispatch: decode RpcRequest
+    Dispatch->>Impl: reflect invoke
+    Impl-->>Dispatch: return result / throw
+    Dispatch-->>Server: RpcResponse
+    Server-->>Client: response frame
+    Client-->>Proxy: future completes
+    Proxy-->>App: return value / throw RpcException
 ```
 
+Key design points (the “why”):
+- **Framing is explicit**: fixed header contains lengths, so Netty can safely slice frames (no delimiter ambiguity).
+- **RequestId is the correlation key**: async transport becomes simple (`Map<requestId, future>`).
+- **IO & business separation**: Netty event loops focus on read/write, business runs on virtual threads → avoids blocking IO threads.
+
+---
+
+## Protocol (binary framing)
+
+Frame layout (big-endian integers):
+
+```text
++---------------------------+
+| Fixed Header              | 22 bytes
++---------------------------+
+| Extensible Header         | headerLen bytes (may be 0)
++---------------------------+
+| Body                      | bodyLen bytes (may be 0)
++---------------------------+
+```
+
+### Fixed header (22 bytes)
+
+| Field | Size | Type | Notes |
+|---|---:|---|---|
+| magic | 2 | short | `0xCAFE` |
+| version | 1 | byte | `1` |
+| serializeType | 1 | byte | `0 = JSON` (SPI extensible) |
+| flags | 2 | short | bitmap (heartbeat/compress/encrypt/oneway/response) |
+| requestId | 8 | long | correlates request/response |
+| headerLen | 4 | int | length of extensible header |
+| bodyLen | 4 | int | length of body bytes |
+
+### Flags (16-bit bitmap)
+
+| Bit | Name | Meaning |
+|---:|---|---|
+| 0 | HEARTBEAT | heartbeat frame |
+| 1 | COMPRESSED | body is compressed (reserved) |
+| 2 | ENCRYPTED | body is encrypted (reserved) |
+| 3 | ONE_WAY | one-way request (reserved) |
+| 4 | RESPONSE | `1 = response`, `0 = request` |
+
+### Implementation mapping
+
+- Protocol parsing/encoding (Netty-free):
+  - `minirpc-protocol`: `FrameParser`, `FrameEncoder`, `MiniRpcFrame`
+- Netty frame slicing:
+  - `minirpc-transport-netty`: `NettyFrameSlicer`
+- Message mapping:
+  - `DefaultMessageCodec` encodes/decodes `RpcRequest` / `RpcResponse` using `SerializerRegistry`
+
+---
+
+## Modules
+
+| Module | Purpose | Status |
+|---|---|---|
+| `minirpc-common` | shared error codes, flag bits | ✅ |
+| `minirpc-protocol` | binary frame + message codec (Netty-free) | ✅ |
+| `minirpc-serialization` | serializer SPI + JSON impl | ✅ |
+| `minirpc-transport-netty` | Netty client/server + slicing | ✅ |
+| `minirpc-core` | exporter/dispatcher/proxy + filter chain skeleton | ✅ |
+| `minirpc-governance` | timeout/retry/trace/log filters | ⏳ (stub) |
+| `minirpc-registry-redis` | Redis registry (TTL + Pub/Sub) | ⏳ (stub) |
+| `minirpc-loadbalancer` | LB strategies (Random/RR) via SPI | ⏳ (stub) |
+| `minirpc-example-provider` | runnable provider demo | ✅ |
+| `minirpc-example-consumer` | runnable consumer demo | ✅ |
+| `minirpc-poc` | experiments (reserved) | 🧪 (currently empty) |
+
+---
+
 ## Testing
+
+Run all tests:
 ```bash
 mvn test
 ```
 
-Run a specific module:
+Run a single module:
 ```bash
 mvn -pl minirpc-protocol test
+mvn -pl minirpc-transport-netty test
+mvn -pl minirpc-core test
 ```
 
-## Configuration Notes
-- Default provider port: 8080
-- Consumer arguments: `host` `port` (defaults to `127.0.0.1 8080`)
-- Examples run without registry; registry and load balancer modules are not wired into the demo flow.
-
-## Protocol Header (Fixed 22 bytes)
-- `magic` (2 bytes)
-- `version` (1 byte)
-- `serializeType` (1 byte)
-- `flags` (2 bytes)
-- `requestId` (8 bytes)
-- `headerLen` (4 bytes)
-- `bodyLen` (4 bytes)
-
-## Module Status
-| Module | Status | Notes |
-| --- | --- | --- |
-| minirpc-protocol | Implemented | Frame encode/decode and validation |
-| minirpc-serialization | Implemented | JSON + SPI registry |
-| minirpc-transport-netty | Implemented | Netty transport + slicing |
-| minirpc-core | Implemented | Exporter, dispatcher, proxy |
-| minirpc-registry-redis | In progress | Registry design present |
-| minirpc-loadbalancer | In progress | Strategy placeholders |
-| minirpc-governance | In progress | Filter chain hooks |
-| minirpc-example-* | Implemented | Runnable demos |
-| minirpc-poc | Experimental | Experiments and notes |
-
-## Project Layout
-- `minirpc-common`: shared utilities and errors
-- `minirpc-protocol`: frame encoding/decoding and protocol definitions
-- `minirpc-serialization`: serializer SPI and JSON implementation
-- `minirpc-transport-netty`: Netty transport, frame slicing, and message codecs
-- `minirpc-registry-redis`: Redis registry (TTL + Pub/Sub design)
-- `minirpc-loadbalancer`: load balancing strategies
-- `minirpc-governance`: filter chain for timeout/retry/trace hooks
-- `minirpc-core`: service export, invocation, and client proxy
-- `minirpc-example-provider`: provider demo
-- `minirpc-example-consumer`: consumer demo
-- `minirpc-poc`: proof-of-concept experiments
+---
 
 ## Documentation
-- `docs/chatgpt/03架构设计/` (architecture overview and design)
-- `docs/chatgpt/06_dev_ready/` (code blueprint and test plan)
+
+- `docs/progress_log.md`: development log and decisions
+- `docs/steps_checklist.md`: milestone checklist (E0–E4)
+- `docs/chatgpt/`: design baseline (requirement freeze, protocol spec, architecture, PoC notes)
+
+---
 
 ## Contributing
-Issues and PRs are welcome. Keep changes modular and add tests when behavior changes.
+
+- Keep module boundaries clean (do not introduce “up-layer” dependencies).
+- Add tests when behavior changes.
+- Prefer small PRs aligned with milestones (E2/E3/E4).
+
+---
 
 ## License
+
 No license yet. Intended for learning and internal use only.
